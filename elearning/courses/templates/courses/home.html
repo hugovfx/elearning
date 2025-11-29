@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Cursos - E-learning{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4 fw-bold">Cursos disponibles</h2>
+
+  <div class="row">
+    {% for curso in cursos %}
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+          {% if curso.imagen %}
+            <img src="{{ curso.imagen.url }}" class="card-img-top" alt="Imagen del curso">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ curso.titulo }}</h5>
+            <p class="card-text text-muted">{{ curso.descripcion|truncatechars:90 }}</p>
+            <p class="small">👨‍🏫 Instructor: <b>{{ curso.instructor }}</b></p>
+            <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-primary w-100">Ver curso</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No hay cursos registrados aún.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

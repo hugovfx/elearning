@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear curso{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Agregar nuevo curso</h2>
+
+  <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary mt-2" type="submit">Guardar curso</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar Lección{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Agregar lección a "{{ curso.titulo }}"</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-success" type="submit">Agregar</button>
+    </form>
+
+    <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-secondary mt-3">⬅ Volver</a>
+</div>
+{% endblock %}

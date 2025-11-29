@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-3">{{ course.titulo }}</h1>
+  <p>{{ course.descripcion }}</p>
+
+  {% if course.imagen %}
+    <img src="{{ course.imagen.url }}" class="img-fluid rounded my-3"/>
+  {% endif %}
+
+  <p class="text-muted">Instructor: {{ course.instructor }}</p>
+
+  <a href="/" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}

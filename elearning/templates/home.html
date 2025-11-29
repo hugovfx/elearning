@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Cursos{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4 text-center">Cursos disponibles</h1>
+
+  <div class="row">
+    {% for curso in cursos %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ curso.title }}</h5>
+            <p class="card-text">{{ curso.description }}</p>
+            <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-primary w-100">Ver curso</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-center">No hay cursos disponibles aún.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
