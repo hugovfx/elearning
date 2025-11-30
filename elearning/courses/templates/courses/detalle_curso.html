@@ -157,6 +157,13 @@
                 </form>
               {% endif %}
             {% endif %}
+            
+            {% if puede_editar %}
+              <hr>
+              <a href="{% url 'calificaciones_curso' course.id %}" class="btn btn-info w-100 mb-2">
+                📊 Ver calificaciones
+              </a>
+            {% endif %}
           {% else %}
             <div class="alert alert-warning">
               Debes <a href="{% url 'login' %}">iniciar sesión</a> para inscribirte

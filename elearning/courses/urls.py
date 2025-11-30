@@ -29,6 +29,12 @@ from .views_notificaciones import (
     generar_notificaciones_manual,
 )
 
+from .views_calificaciones import (
+    calificaciones_curso,
+    generar_certificado,
+    detalle_estudiante_curso,
+)
+
 urlpatterns = [
     # Rutas de cursos
     path('', home, name='home'),
@@ -64,4 +70,9 @@ urlpatterns = [
     path('notificacion/<int:notificacion_id>/marcar-leida/', marcar_leida, name='marcar_leida'),
     path('notificacion/<int:notificacion_id>/eliminar/', eliminar_notificacion, name='eliminar_notificacion'),
     path('generar-notificaciones/', generar_notificaciones_manual, name='generar_notificaciones_manual'),
+
+    # Rutas de calificaciones
+    path('<int:course_id>/calificaciones/', calificaciones_curso, name='calificaciones_curso'),
+    path('<int:course_id>/certificado/<int:student_id>/', generar_certificado, name='generar_certificado'),
+    path('<int:course_id>/estudiante/<int:student_id>/', detalle_estudiante_curso, name='detalle_estudiante_curso'),
 ]

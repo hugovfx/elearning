@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Calificaciones - {{ curso.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📊 Calificaciones del curso</h2>
+            <p class="text-muted mb-0">{{ curso.titulo }}</p>
+        </div>
+        <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-secondary">
+            ⬅ Volver al curso
+        </a>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ total_estudiantes }}</h3>
+                    <p class="text-muted mb-0">Estudiantes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="mb-0">{{ quizzes|length }}</h3>
+                    <p class="text-muted mb-0">Quizzes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="mb-0 text-success">{{ total_aprobados }}</h3>
+                    <p class="text-muted mb-0">Aprobados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="mb-0 text-danger">{{ total_reprobados }}</h3>
+                    <p class="text-muted mb-0">Reprobados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de calificaciones -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Estudiante</th>
+                            {% for quiz in quizzes %}
+                                <th class="text-center">
+                                    {{ quiz.titulo|truncatechars:20 }}
+                                    <br>
+                                    <small class="text-muted">({{ quiz.puntaje_minimo }}%)</small>
+                                </th>
+                            {% endfor %}
+                            <th class="text-center">Promedio</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dato in datos_estudiantes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ dato.estudiante.username }}</strong>
+                                    {% if dato.estudiante.get_full_name %}
+                                        <br>
+                                        <small class="text-muted">{{ dato.estudiante.get_full_name }}</small>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">{{ dato.estudiante.email }}</small>
+                                </td>
+                                
+                                {% for cal in dato.calificaciones %}
+                                    <td class="text-center">
+                                        {% if cal.porcentaje is not None %}
+                                            <span class="badge {% if cal.aprobado %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ cal.porcentaje|floatformat:1 }}%
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Sin realizar</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                
+                                <td class="text-center">
+                                    <strong class="{% if dato.promedio >= 70 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ dato.promedio|floatformat:1 }}%
+                                    </strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ dato.quizzes_completados }}/{{ dato.total_quizzes }}
+                                    </small>
+                                </td>
+                                
+                                <td class="text-center">
+                                    {% if dato.aprobado %}
+                                        <span class="badge bg-success">✓ Aprobado</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Reprobado</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="text-center">
+                                    <a href="{% url 'detalle_estudiante_curso' curso.id dato.estudiante.id %}" 
+                                       class="btn btn-sm btn-primary" 
+                                       title="Ver detalle">
+                                        👁️ Ver
+                                    </a>
+                                    
+                                    {% if dato.aprobado %}
+                                        <a href="{% url 'generar_certificado' curso.id dato.estudiante.id %}" 
+                                           class="btn btn-sm btn-success" 
+                                           title="Generar certificado">
+                                            📜 Certificado
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{{ quizzes|length|add:5 }}" class="text-center text-muted">
+                                    No hay estudiantes inscritos en este curso
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="alert alert-info mt-3">
+        <strong>ℹ️ Criterios de aprobación:</strong>
+        <ul class="mb-0">
+            <li>El estudiante debe completar todos los quizzes del curso</li>
+            <li>El promedio general debe ser igual o mayor a 70%</li>
+            <li>Solo se puede generar certificado si el estudiante ha aprobado</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
