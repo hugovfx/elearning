@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Cursos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">📚 Mis Cursos</h2>
+
+    {% if inscripciones %}
+        <div class="row">
+            {% for inscripcion in inscripciones %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        {% if inscripcion.curso.imagen %}
+                            <img src="{{ inscripcion.curso.imagen.url }}" class="card-img-top" alt="{{ inscripcion.curso.titulo }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ inscripcion.curso.titulo }}</h5>
+                            <p class="card-text text-muted">{{ inscripcion.curso.descripcion|truncatechars:100 }}</p>
+                            <p class="small">
+                                <strong>👨‍🏫 Instructor:</strong> {{ inscripcion.curso.instructor }}<br>
+                                <strong>📅 Inscrito:</strong> {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}
+                            </p>
+                            
+                            {% if inscripcion.completado %}
+                                <span class="badge bg-success">✅ Completado</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">📖 En progreso</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'detalle_curso' inscripcion.curso.id %}" class="btn btn-primary w-100">
+                                Ver curso
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            📭 Aún no estás inscrito en ningún curso.
+            <a href="{% url 'home' %}" class="alert-link">Explora cursos disponibles</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -4,15 +4,169 @@
 
 {% block content %}
 <div class="container py-4">
-  <h1 class="mb-3">{{ course.titulo }}</h1>
-  <p>{{ course.descripcion }}</p>
+  <div class="row">
+    <div class="col-lg-8">
+      <h1 class="mb-3">{{ course.titulo }}</h1>
+      <p class="lead">{{ course.descripcion }}</p>
 
-  {% if course.imagen %}
-    <img src="{{ course.imagen.url }}" class="img-fluid rounded my-3"/>
-  {% endif %}
+      {% if course.imagen %}
+        <img src="{{ course.imagen.url }}" class="img-fluid rounded my-3" alt="{{ course.titulo }}"/>
+      {% endif %}
 
-  <p class="text-muted">Instructor: {{ course.instructor }}</p>
+      <p class="text-muted">
+        <strong>👨‍🏫 Instructor:</strong> {{ course.instructor }}<br>
+        <strong>📅 Fecha de creación:</strong> {{ course.fecha_creacion }}
+      </p>
 
-  <a href="/" class="btn btn-secondary">Volver</a>
+      <hr class="my-4">
+
+      <!-- QUIZZES -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>📝 Evaluaciones</h3>
+        {% if puede_editar %}
+          <a href="{% url 'crear_quiz' course.id %}" class="btn btn-warning btn-sm">
+            ➕ Agregar quiz
+          </a>
+        {% endif %}
+      </div>
+
+      {% with quizzes=course.quizzes.all %}
+        {% if quizzes %}
+          <div class="list-group mb-4">
+            {% for quiz in quizzes %}
+              <a href="{% url 'detalle_quiz' quiz.id %}" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">📝 {{ quiz.titulo }}</h6>
+                    <small class="text-muted">
+                      {{ quiz.total_preguntas }} preguntas • 
+                      Puntaje mínimo: {{ quiz.puntaje_minimo }}% • 
+                      {{ quiz.intentos_maximos }} intentos
+                      {% if quiz.deadline %}
+                        • ⏰ Hasta: {{ quiz.deadline|date:"d/m/Y H:i" }}
+                      {% endif %}
+                    </small>
+                  </div>
+                  {% if not quiz.activo %}
+                    <span class="badge bg-secondary">Inactivo</span>
+                  {% elif not quiz.esta_disponible %}
+                    <span class="badge bg-danger">Cerrado</span>
+                  {% else %}
+                    <span class="badge bg-success">Disponible</span>
+                  {% endif %}
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-info mb-4">
+            📋 Aún no hay evaluaciones en este curso.
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <hr class="my-4">
+
+      <!-- LECCIONES -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>📚 Lecciones del curso</h3>
+        {% if puede_editar %}
+          <a href="{% url 'agregar_leccion' course.id %}" class="btn btn-success btn-sm">
+            ➕ Agregar lección
+          </a>
+        {% endif %}
+      </div>
+
+      {% if lessons %}
+        <div class="list-group">
+          {% for leccion in lessons %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h5 class="mb-1">
+                    {% if leccion.tipo == 'video' %}📹{% elif leccion.tipo == 'documento' %}📄{% else %}📝{% endif %}
+                    {{ leccion.titulo }}
+                  </h5>
+                  <p class="mb-1 text-muted">{{ leccion.descripcion }}</p>
+                  
+                  {% if is_enrolled or puede_editar %}
+                    <!-- Mostrar contenido según tipo -->
+                    {% if leccion.tipo == 'video' and leccion.video_url %}
+                      <div class="mt-2">
+                        <a href="{{ leccion.video_url }}" target="_blank" class="btn btn-sm btn-primary">
+                          ▶️ Ver video
+                        </a>
+                      </div>
+                    {% elif leccion.tipo == 'documento' and leccion.documento %}
+                      <div class="mt-2">
+                        <a href="{{ leccion.documento.url }}" target="_blank" class="btn btn-sm btn-primary">
+                          📥 Descargar documento
+                        </a>
+                      </div>
+                    {% elif leccion.tipo == 'texto' and leccion.contenido_texto %}
+                      <div class="mt-2 p-3 bg-light rounded">
+                        {{ leccion.contenido_texto|safe }}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <small class="text-warning">🔒 Inscríbete para ver el contenido</small>
+                  {% endif %}
+                </div>
+
+                <!-- Botones de edición -->
+                {% if puede_editar %}
+                  <div class="ms-3">
+                    <a href="{% url 'editar_leccion' leccion.id %}" class="btn btn-sm btn-outline-primary">
+                      ✏️
+                    </a>
+                    <a href="{% url 'eliminar_leccion' leccion.id %}" class="btn btn-sm btn-outline-danger">
+                      🗑️
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          📭 Aún no hay lecciones en este curso.
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Acciones</h5>
+          
+          {% if user.is_authenticated %}
+            {% if user.role == 'student' %}
+              {% if is_enrolled %}
+                <div class="alert alert-success">
+                  ✅ Ya estás inscrito en este curso
+                </div>
+              {% else %}
+                <form method="POST" action="{% url 'inscribirse_curso' course.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary w-100">
+                    📝 Inscribirme a este curso
+                  </button>
+                </form>
+              {% endif %}
+            {% endif %}
+          {% else %}
+            <div class="alert alert-warning">
+              Debes <a href="{% url 'login' %}">iniciar sesión</a> para inscribirte
+            </div>
+          {% endif %}
+
+          <a href="/" class="btn btn-secondary w-100 mt-2">⬅ Volver a cursos</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

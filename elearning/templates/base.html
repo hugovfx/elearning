@@ -27,19 +27,34 @@
 
           {% if request.user.is_authenticated %}
             <li class="nav-item me-2">
-              <span class="navbar-text">Hola, {{ request.user.username }}</span>
+              <span class="navbar-text text-white">Hola, {{ request.user.username }}</span>
             </li>
-
-            {% if request.user.role == 'teacher' or request.user.role == 'admin' %}
-
-              <li class="nav-item me-2">
-                <a href="{% url 'crear_curso' %}" class="btn btn-success btn-sm">➕ Crear curso</a>
-              </li>
-            {% endif %}
 
             {% if request.user.role == 'student' %}
               <li class="nav-item me-2">
+                <a href="{% url 'mis_cursos' %}" class="btn btn-info btn-sm">📚 Mis cursos</a>
+              </li>
+              
+              <!-- ICONO DE NOTIFICACIONES -->
+              <li class="nav-item me-2 position-relative">
+                <a href="{% url 'mis_notificaciones' %}" class="btn btn-light btn-sm position-relative">
+                  🔔
+                  {% if request.user.notificaciones_no_leidas > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                      {{ request.user.notificaciones_no_leidas }}
+                    </span>
+                  {% endif %}
+                </a>
+              </li>
+              
+              <li class="nav-item me-2">
                 <a class="btn btn-warning btn-sm" href="{% url 'volverse_teacher' %}">Convertirse en instructor</a>
+              </li>
+            {% endif %}
+
+            {% if request.user.role == 'teacher' or request.user.role == 'admin' %}
+              <li class="nav-item me-2">
+                <a href="{% url 'crear_curso' %}" class="btn btn-success btn-sm">➕ Crear curso</a>
               </li>
             {% endif %}
 
@@ -60,6 +75,18 @@
       </div>
     </div>
   </nav>
+
+  <!-- MENSAJES DE SISTEMA -->
+  {% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <!-- MAIN CONTENT -->
   <main class="container py-4">

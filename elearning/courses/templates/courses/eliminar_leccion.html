@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar Lección{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+            <h2 class="text-danger">🗑️ Eliminar lección</h2>
+            <p class="lead">¿Estás seguro de que deseas eliminar esta lección?</p>
+            
+            <div class="alert alert-warning">
+                <strong>⚠️ Lección:</strong> {{ leccion.titulo }}<br>
+                <strong>Curso:</strong> {{ curso.titulo }}<br>
+                <strong>Tipo:</strong> {{ leccion.get_tipo_display }}
+            </div>
+
+            <p class="text-muted">Esta acción no se puede deshacer.</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">✔️ Sí, eliminar</button>
+                <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-secondary">❌ Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

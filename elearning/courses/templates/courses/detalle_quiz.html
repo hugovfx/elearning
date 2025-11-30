@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <h2>📝 {{ quiz.titulo }}</h2>
+            <p class="lead">{{ quiz.descripcion }}</p>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>Información del quiz:</h6>
+                    <ul class="mb-0">
+                        <li><strong>Preguntas:</strong> {{ quiz.total_preguntas }}</li>
+                        <li><strong>Puntaje mínimo para aprobar:</strong> {{ quiz.puntaje_minimo }}%</li>
+                        <li><strong>Intentos permitidos:</strong> {{ quiz.intentos_maximos }}</li>
+                        {% if quiz.tiempo_limite %}
+                            <li><strong>Tiempo límite:</strong> {{ quiz.tiempo_limite }} minutos</li>
+                        {% endif %}
+                        {% if quiz.deadline %}
+                            <li><strong>Fecha límite:</strong> {{ quiz.deadline|date:"d/m/Y H:i" }}</li>
+                        {% endif %}
+                        <li><strong>Estado:</strong> 
+                            {% if quiz.esta_disponible %}
+                                <span class="badge bg-success">Disponible</span>
+                            {% else %}
+                                <span class="badge bg-danger">Cerrado</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PREGUNTAS (para instructores) -->
+            {% if puede_editar %}
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>🗂️ Preguntas ({{ preguntas.count }})</h4>
+                    <a href="{% url 'agregar_pregunta' quiz.id %}" class="btn btn-primary btn-sm">
+                        ➕ Agregar pregunta
+                    </a>
+                </div>
+
+                {% if preguntas %}
+                    {% for pregunta in preguntas %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="flex-grow-1">
+                                        <h6>Pregunta {{ forloop.counter }}</h6>
+                                        <p class="mb-2">{{ pregunta.texto }}</p>
+                                        <small class="text-muted">Puntos: {{ pregunta.puntos }}</small>
+                                        
+                                        <!-- Opciones -->
+                                        <div class="mt-2">
+                                            {% for opcion in pregunta.opciones.all %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" disabled
+                                                           {% if opcion.es_correcta %}checked{% endif %}>
+                                                    <label class="form-check-label {% if opcion.es_correcta %}text-success fw-bold{% endif %}">
+                                                        {{ opcion.texto }}
+                                                        {% if opcion.es_correcta %}✓{% endif %}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <a href="{% url 'editar_pregunta' pregunta.id %}" class="btn btn-sm btn-outline-primary">✏️</a>
+                                        <a href="{% url 'eliminar_pregunta' pregunta.id %}" class="btn btn-sm btn-outline-danger">🗑️</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-warning">
+                        ⚠️ Este quiz no tiene preguntas aún.
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- INTENTOS PREVIOS (para estudiantes) -->
+            {% if user.role == 'student' and intentos %}
+                <hr>
+                <h4>📊 Tus intentos anteriores</h4>
+                <div class="list-group">
+                    {% for intento in intentos %}
+                        <a href="{% url 'resultado_quiz' intento.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Intento {{ forloop.counter }}</strong><br>
+                                    <small>{{ intento.fecha_inicio|date:"d/m/Y H:i" }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="mb-0">
+                                        <span class="badge {% if intento.aprobado %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ intento.porcentaje|floatformat:1 }}%
+                                        </span>
+                                    </h5>
+                                    <small>{{ intento.puntaje_obtenido }}/{{ intento.puntaje_maximo }} puntos</small>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Acciones</h5>
+                    
+                    {% if puede_editar %}
+                        <a href="{% url 'editar_quiz' quiz.id %}" class="btn btn-primary w-100 mb-2">
+                            ✏️ Editar quiz
+                        </a>
+                        <a href="{% url 'eliminar_quiz' quiz.id %}" class="btn btn-danger w-100 mb-2">
+                            🗑️ Eliminar quiz
+                        </a>
+                    {% elif user.role == 'student' %}
+                        {% if not is_enrolled %}
+                            <div class="alert alert-warning">
+                                Debes inscribirte al curso para realizar este quiz.
+                            </div>
+                        {% elif puede_intentar %}
+                            <form method="POST" action="{% url 'realizar_quiz' quiz.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100 mb-2">
+                                    🎯 Realizar quiz
+                                </button>
+                            </form>
+                            <small class="text-muted">
+                                Tienes {{ quiz.intentos_maximos|add:"-"|add:intentos.count }} intentos restantes
+                            </small>
+                        {% else %}
+                            <div class="alert alert-danger">
+                                ❌ Ya no puedes realizar este quiz
+                                {% if intentos.count >= quiz.intentos_maximos %}
+                                    (agotaste tus intentos)
+                                {% else %}
+                                    (quiz cerrado)
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-secondary w-100 mt-2">
+                        ⬅ Volver al curso
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

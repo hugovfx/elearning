@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado del Quiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow">
+        <div class="card-header {% if intento.aprobado %}bg-success{% else %}bg-danger{% endif %} text-white">
+            <h3 class="mb-0">
+                {% if intento.aprobado %}
+                    🎉 ¡Felicidades! Aprobaste
+                {% else %}
+                    😔 No aprobaste esta vez
+                {% endif %}
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row text-center mb-4">
+                <div class="col-md-3">
+                    <h2 class="display-4 {% if intento.aprobado %}text-success{% else %}text-danger{% endif %}">
+                        {{ intento.porcentaje|floatformat:1 }}%
+                    </h2>
+                    <p class="text-muted">Tu calificación</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-4">{{ intento.puntaje_obtenido|floatformat:0 }}</h2>
+                    <p class="text-muted">Puntos obtenidos</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-4">{{ intento.puntaje_maximo|floatformat:0 }}</h2>
+                    <p class="text-muted">Puntos totales</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-4">{{ intento.quiz.puntaje_minimo }}%</h2>
+                    <p class="text-muted">Puntaje mínimo</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h4 class="mb-3">📋 Revisión de respuestas</h4>
+
+            {% for respuesta in respuestas %}
+                <div class="card mb-3 {% if respuesta.es_correcta %}border-success{% else %}border-danger{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6>
+                                    Pregunta {{ forloop.counter }}
+                                    {% if respuesta.es_correcta %}
+                                        <span class="badge bg-success">✓ Correcta</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">✗ Incorrecta</span>
+                                    {% endif %}
+                                </h6>
+                                <p class="mb-2"><strong>{{ respuesta.pregunta.texto }}</strong></p>
+                                
+                                <div class="mt-2">
+                                    <p class="mb-1">
+                                        <strong>Tu respuesta:</strong> 
+                                        <span class="{% if respuesta.es_correcta %}text-success{% else %}text-danger{% endif %}">
+                                            {{ respuesta.opcion_seleccionada.texto }}
+                                        </span>
+                                    </p>
+                                    
+                                    {% if not respuesta.es_correcta %}
+                                        {% for opcion in respuesta.pregunta.opciones.all %}
+                                            {% if opcion.es_correcta %}
+                                                <p class="mb-0">
+                                                    <strong>Respuesta correcta:</strong> 
+                                                    <span class="text-success">{{ opcion.texto }}</span>
+                                                </p>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <span class="badge bg-secondary">{{ respuesta.pregunta.puntos }} pts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <hr>
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'detalle_quiz' intento.quiz.id %}" class="btn btn-primary">
+                    📝 Volver al quiz
+                </a>
+                <a href="{% url 'detalle_curso' intento.quiz.curso.id %}" class="btn btn-secondary">
+                    📚 Volver al curso
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

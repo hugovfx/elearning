@@ -8,3 +8,8 @@ class User(AbstractUser):
         ('admin', 'Administrador'),
     )
     role = models.CharField(max_length=20, choices=ROLES, default='student')
+    
+    @property
+    def notificaciones_no_leidas(self):
+        """Retorna el número de notificaciones no leídas"""
+        return self.notificaciones.filter(leida=False).count()

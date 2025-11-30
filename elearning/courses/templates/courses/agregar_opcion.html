@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar Opciones{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>✏️ Agregar opciones de respuesta</h2>
+    <p class="lead">Pregunta: {{ pregunta.texto }}</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    Nueva opción
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-success w-100" type="submit">
+                                ➕ Agregar opción
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <strong>💡 Consejo:</strong> Crea al menos 4 opciones y marca cuál(es) son correctas.
+            </div>
+
+            <a href="{% url 'detalle_quiz' quiz.id %}" class="btn btn-secondary w-100 mt-2">
+                ✅ Terminar y ver quiz
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    Opciones existentes ({{ opciones_existentes.count }})
+                </div>
+                <div class="card-body">
+                    {% if opciones_existentes %}
+                        <ul class="list-group">
+                            {% for opcion in opciones_existentes %}
+                                <li class="list-group-item {% if opcion.es_correcta %}list-group-item-success{% endif %}">
+                                    {{ opcion.texto }}
+                                    {% if opcion.es_correcta %}
+                                        <span class="badge bg-success float-end">✓ Correcta</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">Aún no hay opciones agregadas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

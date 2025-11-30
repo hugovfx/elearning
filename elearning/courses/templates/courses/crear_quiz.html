@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Quiz{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>📝 Crear nuevo quiz</h2>
+    <p class="text-muted">Curso: {{ curso.titulo }}</p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        
+                        {% if field.errors %}
+                            <div class="text-danger small">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                <div class="mt-4">
+                    <button class="btn btn-success" type="submit">💾 Crear quiz</button>
+                    <a href="{% url 'detalle_curso' curso.id %}" class="btn btn-secondary">❌ Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt-3">
+        <strong>ℹ️ Nota:</strong> Después de crear el quiz, podrás agregar preguntas y opciones de respuesta.
+    </div>
+</div>
+{% endblock %}

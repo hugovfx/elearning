@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar Pregunta{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+            <h2 class="text-danger">🗑️ Eliminar pregunta</h2>
+            <div class="alert alert-warning">
+                <p><strong>Pregunta:</strong> {{ pregunta.texto }}</p>
+                <p class="mb-0">Se eliminarán también todas las opciones y respuestas asociadas.</p>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">✔️ Sí, eliminar</button>
+                <a href="{% url 'detalle_quiz' quiz.id %}" class="btn btn-secondary">❌ Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
