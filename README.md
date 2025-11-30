@@ -48,7 +48,7 @@ Plataforma de aprendizaje en línea desarrollada con Django que permite a instru
 
 ### 1. Clonar el repositorio (o descargar el ZIP)
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/hugovfx/elearning.git
 cd elearning
 ```
 
